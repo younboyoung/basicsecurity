@@ -2,12 +2,14 @@ package io.security.basicsecurity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -25,15 +27,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Override
     public void configure(HttpSecurity http) throws Exception {
         String loginUrl = "/login";
 
         http
                 .authorizeRequests()
-                .anyRequest().authenticated();
-
-        http
+                .anyRequest().authenticated()
+        .and()
                 .formLogin()
                 //.loginPage( "/loginPage")
                 .defaultSuccessUrl("/")
@@ -56,9 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .permitAll()
-        ;
-
-        http
+        .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl(loginUrl)
@@ -76,6 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .deleteCookies("remember-me")
-                ;
+        .and()
+                .rememberMe()
+                .rememberMeParameter("remember")
+                .tokenValiditySeconds(3600)
+                .userDetailsService(userDetailsService)
+        ;
     }
 }
