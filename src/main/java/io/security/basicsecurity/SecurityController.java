@@ -31,4 +31,8 @@ public class SecurityController {
         return "adminPay";
     }
 
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }
